@@ -1,13 +1,16 @@
 import java.io.BufferedReader;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 public class MapReader {
     private ArrayList<String[]> map;
     private int[] destinationCoords;
     private int[] initCoords;
+    private PriorityQueue<String> obstacles;
 
     public MapReader(String filename){
         ArrayList<String[]> tempMap = null;
+        this.obstacles = null;
         this.destinationCoords[0] = -1;
         this.destinationCoords[1] = -1;
         this.initCoords[0] = -1;
@@ -42,6 +45,9 @@ public class MapReader {
                     this.initCoords[0] = j;
                     this.initCoords[1] = i;
                 }
+                if(tempMap.get(i)[j] == "+") {
+                    this.obstacles.add(Integer.toString(j)+","+Integer.toString(i));
+                }
             }
             if((this.destinationCoords[0] != -1) && (this.initCoords[0] != -1)){break;}
         }
@@ -57,5 +63,9 @@ public class MapReader {
 
     public int[] getInitCoords() {
         return initCoords;
+    }
+
+    public PriorityQueue<String> getObstacles() {
+        return obstacles;
     }
 }
