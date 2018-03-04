@@ -14,6 +14,6 @@ public class Node {
         this.node_y = y;
         this.dest_x = dest_x;
         this.dest_y = dest_y;
-        this.distanceFromDest = sqrt((dest_x - x)^2 + (dest_y - y)^2);
+        this.distanceFromDest = (dest_x - x) + (dest_y - y);
     }
 }
