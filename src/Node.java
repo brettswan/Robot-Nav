@@ -1,3 +1,4 @@
+import static java.lang.Math.abs;
 import static java.lang.Math.sqrt;
 
 public class Node {
@@ -14,6 +15,6 @@ public class Node {
         this.node_y = y;
         this.dest_x = dest_x;
         this.dest_y = dest_y;
-        this.distanceFromDest = (dest_x - x) + (dest_y - y);
+        this.distanceFromDest = abs(dest_x - x) + abs(dest_y - y);
     }
 }
