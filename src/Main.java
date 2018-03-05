@@ -32,12 +32,12 @@ public class Main {
             // Create the start node using the currCoords initial value
             Node startNode = new Node(currCoords[0],currCoords[1],destCoords[0],destCoords[1],0);
 
-            System.out.println(""+startNode.distanceFromDest);
+            System.out.println(""+startNode.manDistance);
             // Create a new Route with the startNode as the only element
             Route path = new Route(startNode);
 
             // Create a queue to store all visited coordinates
-            PriorityQueue<String> visitedCoords = new PriorityQueue<>();
+            PriorityQueue<Node> visitedNodes = new PriorityQueue<>();
 
             // Create an array of Routes to store different paths
             ArrayList<Route> routes = new ArrayList<Route>();
@@ -46,7 +46,7 @@ public class Main {
             routes.add(path);
 
             // Add the coordinates of the startNode to the visitedCoords
-            visitedCoords.add(Integer.toString(startNode.node_x)+","+Integer.toString(startNode.node_y));
+            visitedNodes.add(startNode);
 
             // ACTUAL ALGORITHM
             while(currCoords != destCoords) {
@@ -61,10 +61,10 @@ public class Main {
                     int curr_x = node.node_x;
                     int curr_y = node.node_y;
 
-                    Node up = new Node(curr_x,curr_y-1,destCoords[0],destCoords[1],node.distanceTraveled+1);
-                    Node down = new Node(curr_x,curr_y+1,destCoords[0],destCoords[1],node.distanceTraveled+1);
-                    Node right = new Node(curr_x+1,curr_y,destCoords[0],destCoords[1],node.distanceTraveled+1);
-                    Node left = new Node(curr_x-1,curr_y,destCoords[0],destCoords[1],node.distanceTraveled+1);
+                    Node up = new Node(curr_x,curr_y-1,destCoords[0],destCoords[1],node.cost+1);
+                    Node down = new Node(curr_x,curr_y+1,destCoords[0],destCoords[1],node.cost+1);
+                    Node right = new Node(curr_x+1,curr_y,destCoords[0],destCoords[1],node.cost+1);
+                    Node left = new Node(curr_x-1,curr_y,destCoords[0],destCoords[1],node.cost+1);
                 }
 
             }
