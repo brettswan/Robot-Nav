@@ -32,6 +32,7 @@ public class Main {
             // Create the start node using the currCoords initial value
             Node startNode = new Node(currCoords[0],currCoords[1],destCoords[0],destCoords[1],0);
 
+            System.out.println(""+startNode.distanceFromDest);
             // Create a new Route with the startNode as the only element
             Route path = new Route(startNode);
 
@@ -50,7 +51,7 @@ public class Main {
             // ACTUAL ALGORITHM
             while(currCoords != destCoords) {
                 // Intialize an empy array of Nodes to explore the fringe
-                ArrayList<Node> edgeNodes = null;
+                ArrayList<Node> edgeNodes = new ArrayList<>();
 
                 for(int i=0; i<routes.size(); i++) {
 

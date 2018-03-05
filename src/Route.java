@@ -4,7 +4,7 @@ import java.util.Queue;
 import java.util.Stack;
 
 public class Route {
-    Stack<Node> path;
+    Stack<Node> path = new Stack<>();
 
     public Route(Node n) {
         this.path.push(n);
