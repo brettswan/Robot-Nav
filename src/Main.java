@@ -1,14 +1,11 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.*;
-
-import static java.lang.Thread.sleep;
 
 public class Main {
 
     public static void main(String[] args) {
         String filename;
-        int[] currCoords;
+        int[] currCoords = new int[2];
+        int[] startCoords;
 
         // coordinates of the destination node in array format [x,y]
         int[] destCoords;
@@ -22,137 +19,131 @@ public class Main {
             //initialize empty map
             ArrayList<String[]> map;
 
+            //temporary new route object
+            Route newPath;
+
             // Create new MapReader object
             MapReader reader = new MapReader(filename);
             // Get the start coordinates from the MapReader
-            currCoords = reader.getInitCoords();
+            startCoords = reader.getInitCoords();
+            currCoords = startCoords.clone();
+
             // Get the destination coordinates from the MapReader
             destCoords = reader.getDestinationCoords();
             // Get the coordinates of all obstacles from the MapReader
             obstacles = reader.getObstacles();
+            int mapDim = reader.getMap().size();
 
             // Create the start node using the currCoords initial value
-            Node startNode = new Node(currCoords[0],currCoords[1],destCoords[0],destCoords[1],0, obstacles);
+            Node startNode = new Node(startCoords[0], startCoords[1], destCoords[0], destCoords[1], 0);
 
-            System.out.println(""+startNode.manDistance);
+            System.out.println("" + startNode.manDistance);
             // Create a new Route with the startNode as the only element
 
-            Route path = new Route(startNode);
-
-            // Create a queue to store all visited coordinates
-            ArrayList<Node> visitedNodes = new ArrayList<Node>();
-
-            // Create an array of Routes to store different paths
-            ArrayList<Route> routes = new ArrayList<Route>();
-
-            // Store the first path
-            routes.add(path);
-
-            // Add the coordinates of the startNode to the visitedCoords
-            visitedNodes.add(startNode);
-
             // ACTUAL ALGORITHM
-            System.out.println(currCoords[0] + "," + currCoords[1]);
+            System.out.println(startCoords[0] + "," + startCoords[1]);
             System.out.println(destCoords[0] + "," + destCoords[1]);
 
-            while(!currCoords.equals(destCoords)) {
-                // Intialize an empy array of Nodes to explore the fringe
-                //ArrayList<Node> edgeNodes = new ArrayList<>();
 
-                //for each path in routes, peak on the path (take first val), and insert resunt into edge edgeNodes
+            for (int distType = 0; distType < 3; distType++) {
+                Route path = new Route(startNode, mapDim, obstacles, distType);
 
-                for(Route r : routes){
+                // Create an array of Routes to store different paths
+                ArrayList<Route> routes = new ArrayList<Route>();
 
-                    ArrayList<Node> choices = new ArrayList<>(); // but how are we treating the obsticles
+                // Store the first path
+                routes.add(path);
 
-                    Node headNode = r.path.peek();
-
-                    int curr_x = headNode.node_x;
-                    int curr_y = headNode.node_y;
-
-                    // printing variables for terminal
-                    String up_print = "";
-                    String down_print = "";
-                    String right_print = "";
-                    String left_print = "";
-                    ////
-
-                    //up
-                    Node up = new Node(curr_x,curr_y-1,destCoords[0],destCoords[1],headNode.cost+1, obstacles);
-                    if ((!up.isObstacle) && (!visitedNodes.contains(up))){choices.add(up);}
-
-                    //down
-                    Node down = new Node(curr_x,curr_y+1,destCoords[0],destCoords[1],headNode.cost+1,obstacles);
-                    if ((!down.isObstacle) && (!visitedNodes.contains(down))){choices.add(down);}
-
-                    //right
-                    Node right = new Node(curr_x+1,curr_y,destCoords[0],destCoords[1],headNode.cost+1,obstacles);
-                    if ((!right.isObstacle) && (!visitedNodes.contains(right))){choices.add(right);}
-
-                    //left
-                    Node left = new Node(curr_x-1,curr_y,destCoords[0],destCoords[1],headNode.cost+1,obstacles);
-                    if ((!left.isObstacle) && (!visitedNodes.contains(left))){choices.add(left);}
+                // Add the coordinates of the startNode to the visitedCoords
+                routes.get(0).addVisited(startNode);
+                currCoords = startCoords.clone();
+                while (!Arrays.equals(currCoords,destCoords)) {
 
 
-                    Node best_node = choices.get(0);
-                    for (Node choice_node : choices){
-                        if (choice_node.totalCost < best_node.totalCost){
-                            best_node = choice_node; // else best node stays the same
-                        }
-                        if (choice_node.totalCost == best_node.totalCost){
-                            // pick one with smallest i value {i,j]
-                            if(choice_node.node_x < best_node.node_x){
-                                best_node = choice_node; // else best node stays the same
+                    //for each path in routes, peak on the path (take first val), and insert resunt into edge edgeNodes
+
+                    // iterate through all current routes
+                    for (Route r : routes) {
+                        r.explore(currCoords,destCoords);
+
+                        currCoords[0] = r.path.get(r.path.size()-1).node_x;
+                        currCoords[1] = r.path.get(r.path.size()-1).node_y;
+
+                        if(Arrays.equals(currCoords,destCoords)){
+                            System.out.println("Route Found");
+                            System.out.println("" + (r.getDistanceTraveled()-1) + " steps taken");
+                            ArrayList<ArrayList<String>> outputMap = reader.getMap();
+                            for (Node n : r.path) {
+
+                                System.out.println("\n" + n.node_x + "," + n.node_y);
+                                if (!n.equals(r.path.get(0)) || !n.equals(r.path.get(r.path.size() - 1))) {
+                                    outputMap.get(n.node_y).set(n.node_x, "o");
+                                }
+                                else{
+                                    outputMap.get(n.node_y).set(n.node_x, "&");
+                                }
                             }
+
+                            for (ArrayList<String> row : outputMap) {
+                                StringBuilder sb = new StringBuilder();
+                                for (String c : row) {
+                                    sb.append(c);
+                                }
+                                System.out.println(sb.toString());
+                            }
+                            for (Node n : r.path) {
+                                outputMap.get(n.node_y).set(n.node_x, ".");
+                            }
+                            break;
                         }
+
+//                        if (up.isObstacle) {
+//                            up_print = " + ";
+//                        } else {
+//                            up_print = Integer.toString(up.totalCost);
+//                        }
+//
+//
+//                        if (down.isObstacle) {
+//                            down_print = " + ";
+//                        } else {
+//                            down_print = Integer.toString(down.totalCost);
+//                        }
+//
+//
+//                        if (right.isObstacle) {
+//                            right_print = " + ";
+//                        } else {
+//                            right_print = Integer.toString(right.totalCost);
+//                        }
+//
+//
+//                        if (left.isObstacle) {
+//                            left_print = " + ";
+//                        } else {
+//                            left_print = Integer.toString(left.totalCost);
+//                        }
+
+                        //                        System.out.println("**************************");
+                        //                        System.out.println("COST: " + headNode.totalCost);
+                        //                        System.out.println("STEP: " + headNode.cost);
+                        //                        System.out.println("[" + headNode.node_x + ", " + headNode.node_y + "]");
+                        //                        System.out.println("\n  " + up_print + "  " + "\n" + left_print + " O " + right_print + "\n  " + down_print + "  ");
+
+                        //                        if(Integer.toString(headNode.node_x)+","+Integer.toString()
+                        //                    System.out.println(best_node.totalCost);
+
+
+                        //                        try {
+                        //                            Thread.sleep(100);
+                        //                        } catch (InterruptedException e) {
+                        //                            e.printStackTrace();
+                        //                        }
                     }
-
-                    if(up.isObstacle){ up_print = " + "; }
-                    else{ up_print = Integer.toString(up.totalCost); }
-
-
-                    if(down.isObstacle){ down_print = " + ";}
-                    else{down_print = Integer.toString(down.totalCost);}
-
-
-                    if(right.isObstacle){ right_print = " + ";}
-                    else{right_print = Integer.toString(right.totalCost);}
-
-
-                    if(left.isObstacle){left_print = " + "; }
-                    else{left_print = Integer.toString(left.totalCost);}
-
-                    System.out.println("**************************");
-
-                    System.out.println(headNode.node_x + ", " + headNode.node_y);
-                    System.out.println("\n " + up_print + "  " + "\n" + left_print + " O " + right_print + "\n  " + down_print + "  ");
-                    System.out.println(best_node.totalCost);
-
-
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    // re assign values
-                    //curr_x = best_node.node_x;
-                    //curr_y = best_node.node_y;
-
-                    //currCoords[0] = best_node.node_x;
-                    //currCoords[1] = best_node.node_y;
-
-                    r.path.push(best_node);
-                    visitedNodes.add(best_node);
-
-
-
                 }
-
             }
-
-
-
+            System.out.println("Exiting");
+            System.exit(0);
         }
         else {
             System.out.println("No filename provided. Quitting...");
